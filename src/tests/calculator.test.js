@@ -3,6 +3,9 @@ const {
   subtract,
   multiply,
   divide,
+  modulo,
+  power,
+  squareRoot,
   calculate,
 } = require('../calculator');
 
@@ -139,10 +142,123 @@ describe('calculate (dispatcher)', () => {
   });
 
   test('throws on unsupported operator', () => {
-    expect(() => calculate(2, '%', 3)).toThrow(/Unsupported operator/);
+    expect(() => calculate(2, '?', 3)).toThrow(/Unsupported operator/);
   });
 
   test('propagates division-by-zero error', () => {
     expect(() => calculate(1, '/', 0)).toThrow('Division by zero is not allowed.');
+  });
+
+  test.each([
+    [5, '%', 2, 1],
+    [2, '^', 3, 8],
+  ])('calculate(%i %s %i) = %i (extended operations from image)', (a, op, b, expected) => {
+    expect(calculate(a, op, b)).toBe(expected);
+  });
+
+  test('supports "**" as exponentiation operator', () => {
+    expect(calculate(2, '**', 10)).toBe(1024);
+  });
+
+  test('propagates modulo-by-zero error', () => {
+    expect(() => calculate(5, '%', 0)).toThrow('Modulo by zero is not allowed.');
+  });
+});
+
+describe('modulo', () => {
+  test('5 % 2 = 1 (example from image)', () => {
+    expect(modulo(5, 2)).toBe(1);
+  });
+
+  test('returns 0 when evenly divisible', () => {
+    expect(modulo(10, 5)).toBe(0);
+  });
+
+  test('handles negative dividend', () => {
+    expect(modulo(-7, 3)).toBe(-1);
+  });
+
+  test('handles negative divisor', () => {
+    expect(modulo(7, -3)).toBe(1);
+  });
+
+  test('handles floating point operands', () => {
+    expect(modulo(5.5, 2)).toBeCloseTo(1.5);
+  });
+
+  test('zero modulo a number is zero', () => {
+    expect(modulo(0, 5)).toBe(0);
+  });
+
+  test('throws on modulo by zero', () => {
+    expect(() => modulo(5, 0)).toThrow('Modulo by zero is not allowed.');
+  });
+
+  test('throws on zero modulo zero', () => {
+    expect(() => modulo(0, 0)).toThrow('Modulo by zero is not allowed.');
+  });
+});
+
+describe('power', () => {
+  test('2 ^ 3 = 8 (example from image)', () => {
+    expect(power(2, 3)).toBe(8);
+  });
+
+  test('any number to the power of 0 is 1', () => {
+    expect(power(99, 0)).toBe(1);
+  });
+
+  test('any number to the power of 1 is itself', () => {
+    expect(power(7, 1)).toBe(7);
+  });
+
+  test('0 to a positive power is 0', () => {
+    expect(power(0, 5)).toBe(0);
+  });
+
+  test('handles negative exponent (reciprocal)', () => {
+    expect(power(2, -2)).toBe(0.25);
+  });
+
+  test('handles negative base with even exponent', () => {
+    expect(power(-3, 2)).toBe(9);
+  });
+
+  test('handles negative base with odd exponent', () => {
+    expect(power(-3, 3)).toBe(-27);
+  });
+
+  test('handles fractional exponent (square root via power)', () => {
+    expect(power(9, 0.5)).toBeCloseTo(3);
+  });
+});
+
+describe('squareRoot', () => {
+  test('√16 = 4 (example from image)', () => {
+    expect(squareRoot(16)).toBe(4);
+  });
+
+  test('square root of 0 is 0', () => {
+    expect(squareRoot(0)).toBe(0);
+  });
+
+  test('square root of 1 is 1', () => {
+    expect(squareRoot(1)).toBe(1);
+  });
+
+  test('square root of a non-perfect square', () => {
+    expect(squareRoot(2)).toBeCloseTo(1.41421356);
+  });
+
+  test('square root of a floating point number', () => {
+    expect(squareRoot(6.25)).toBe(2.5);
+  });
+
+  test('throws on negative input', () => {
+    expect(() => squareRoot(-1)).toThrow('Cannot compute square root of a negative number.');
+  });
+
+  test('throws on negative floating point input', () => {
+    expect(() => squareRoot(-0.0001)).toThrow('Cannot compute square root of a negative number.');
   });
 });
