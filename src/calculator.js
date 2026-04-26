@@ -81,7 +81,7 @@ function calculate(a, operator, b) {
     case '**':
       return power(a, b);
     default:
-      throw new Error(`Unsupported operator: '${operator}'. Use one of: + - * / % ^`);
+      throw new Error(`Unsupported operator: '${operator}'. Use one of: + - * x X / % ^ **`);
   }
 }
 
